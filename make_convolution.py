@@ -17,7 +17,7 @@
 import numpy as np
 
 first_line = 5
-last_line = 67
+last_line = 65
 row_number = 2
 
 omega = 0.4
