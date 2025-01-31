@@ -2,64 +2,84 @@ import matplotlib.pyplot as plt
 import numpy as np
 import glob
 import re
+import os
 
-def normalize_and_plot_specific_files(experiment_file, con_file_pattern):
-    """
-    Normalize and plot data from a specified experiment file and con(R,r) pattern files.
+dir_name = 'calculations'
+experiment_file = "experiment.txt"
+con_file_pattern = "con(*,*,*).txt"
 
-    Args:
-        experiment_file (str): Path to the experiment file (e.g., "experiment.txt").
-        con_file_pattern (str): Pattern for con(R,r) files (e.g., "con(*,*).txt").
-    """
-    # Initialize the plot
-    plt.figure(figsize=(10, 6))
-    
-    # Process the experiment file
+def normalize_and_plot_specific_files(dir_name, experiment_file, con_file_pattern):
+    plt.figure( figsize=(15, 10), \
+                # facecolor='ivory' \
+               )
+
+    # 実験結果のRCを用意するところ
     try:
         data = np.loadtxt(experiment_file)
         x = data[:, 0]
         y = data[:, 1]
         y_normalized = y / np.max(y)
-        plt.plot(x, y_normalized, label=f"Experiment: {experiment_file}", linestyle='--')
+        plt.scatter(    x, y_normalized, \
+                        label=f"Experiment: {experiment_file}", \
+                        edgecolor='Red', \
+                        facecolor='None', \
+                        s=500, \
+                        linewidth=2.0 \
+                    )
     except Exception as e:
         print(f"Error processing experiment file '{experiment_file}': {e}")
     
-    # Process con(R,r) files
-    con_files = glob.glob(con_file_pattern)
+    # 計算結果のRCを用意するところ
+    os.chdir(dir_name)
+    con_files = glob.glob(con_file_pattern) # マッチするパスを全て回収
     valid_con_files = []
     
     for file in con_files:
-        # Match the con(R,r) pattern using a regex
-        if re.match(r"con\(\d+\.\d+,\d+\.\d+\)\.txt", file):
+        if re.match(r"con\(\d+\.\d+,\d+\.\d+,\d+\.\d+\)\.txt", file):
             valid_con_files.append(file)
     
     if not valid_con_files:
-        print("No valid con(R,r) files found.")
+        print("No valid con(R,r,SIC) files found.")
         return
 
-    # Plot con(R,r) files
+    # ファイル処理部分
     for file in valid_con_files:
         try:
             data = np.loadtxt(file)
             x = data[:, 0]
             y = data[:, 1]
             y_normalized = y / np.max(y)
-            plt.plot(x, y_normalized, label=f"Con File: {file}")
+            plt.plot( \
+                    x, y_normalized, \
+                    label=f"Con File: {file}" 
+                        )
         except Exception as e:
             print(f"Error processing file '{file}': {e}")
     
-    # Customize the plot
-    plt.xlabel("X-axis")
-    plt.ylabel("Normalized Y-axis")
-    plt.title("Normalized Data from Experiment and Con Files")
-    plt.legend(loc="best")
-    plt.grid(True)
+    # 画像作成部分
+    plt.xticks( fontsize=28, \
+                fontname="Times New Roman")
+    plt.gca().tick_params( \
+                axis="x", \
+                direction="in", \
+                width=1, \
+                length=10, \
+                pad=14 )
+    plt.yticks([])
+    plt.xlabel("Glancing angle (degree)", \
+                labelpad=18, \
+                fontsize=32, \
+                fontname="Times New Roman")
+    plt.ylabel("Intensity (abs. unit)", \
+                labelpad=22, \
+                fontsize=32, \
+                fontname="Times New Roman")
+    plt.legend( loc="best", \
+                fontsize=20 )
     plt.tight_layout()
-    
-    # Show the plot
     plt.savefig('Compare_RC.png')
 
-# Example usage
-experiment_file = "experiment.txt"            # Path to the experiment file
-con_file_pattern = "con(*,*).txt"             # Glob pattern for con(R,r) files
-normalize_and_plot_specific_files(experiment_file, con_file_pattern)
+    os.rename('Compare_RC.png', '../Compare_RC.png')
+    os.chdir('../')
+    os.system('open Compare_RC.png')
+normalize_and_plot_specific_files(dir_name, experiment_file, con_file_pattern)
