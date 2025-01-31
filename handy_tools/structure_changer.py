@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from decimal import *
 import re
 import math
+import os
+import subprocess
 
 # 本プログラムは構造を周期的に繰り返し、緩和させるプログラムである。
 # surf_temp.txtで構造以外のパラメターを指定し、残りはデータをもとに再起的に作成する
@@ -12,13 +14,17 @@ import math
 period = 9
 unit_len = 4.01245
 
-R = 3.00
-r = 0.02
+print('Give R, r, SIC compression in oneline, divided by comma')
+given = input().split(',')
+
+R = float(given[0])
+r = float(given[1])
+sic = float(given[2])
+
 z1 = 2.8
 z2 = 2.7
 z_bulk = 3.276
 z0 = 0.80
-sic = 0.005
 
 # 上記から計算される必要パラメター
 R0 = unit_len / math.sqrt(3)
@@ -114,8 +120,24 @@ for line in structure_lines:
     formatted_line = ', '.join(parts)
     structure_param.append(formatted_line + '\n')
 
-result = atom_param + basic_param + atoms + structure_param + ['1']
+modified = atom_param + basic_param + atoms + structure_param + ['1']
 
 with open(output_file, 'w') as file:
-    file.writelines(result)
+    file.writelines(modified)
 
+# RCを自動的に計算し、直下ディレクトリに格納するためのプログラム
+dir_name = 'calculations/'
+if not os.path.isdir(dir_name):
+    os.mkdir(dir_name)
+
+filename = 'con' + '(' + given[0] + ',' + given[1] + ',' + given[2] + ')' + '.txt'
+
+result = subprocess.run(
+    ["bash", 'RockingCurve_generator.sh'],         # シェルスクリプトを呼び出すコマンド
+    input=filename,           # 標準入力に渡す値
+    text=True,                     # テキストモードを有効化
+    capture_output=True            # 出力をキャプチャ
+)
+print("Standard Error:", result.stderr)
+
+os.rename(filename, dir_name + filename)
