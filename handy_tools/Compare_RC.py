@@ -3,6 +3,8 @@ import numpy as np
 import glob
 import re
 import os
+import subprocess
+import platform
 
 dir_name = 'calculations'
 experiment_file = "experiment.txt"
@@ -81,5 +83,14 @@ def normalize_and_plot_specific_files(dir_name, experiment_file, con_file_patter
 
     os.rename('Compare_RC.png', '../Compare_RC.png')
     os.chdir('../')
-    os.system('open Compare_RC.png')
+    open_img('Compare_RC.png')
+
+def open_img(image_path):
+    if platform.system() == "Windows":
+        os.startfile(image_path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", image_path])
+    else:  # Linux
+        subprocess.run(["xdg-open", image_path])
+
 normalize_and_plot_specific_files(dir_name, experiment_file, con_file_pattern)

@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import platform
+import subprocess
 
 dataset = pd.read_csv('112_Data.csv')
 
@@ -16,4 +18,12 @@ plt.legend(title="Data Sets")
 plt.grid(True)
 plt.tight_layout()
 plt.savefig('experiment.png')
-os.system('open experiment.png')
+open_img('experiment.png')
+
+def open_img(image_path):
+    if platform.system() == "Windows":
+        os.startfile(image_path)
+    elif platform.system() == "Darwin":  # macOS
+        subprocess.run(["open", image_path])
+    else:  # Linux
+        subprocess.run(["xdg-open", image_path])
