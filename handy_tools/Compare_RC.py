@@ -1,16 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
-import re
 import os
 import subprocess
 import platform
+import pandas as pd
 
-dir_name = 'calculations'
 experiment_file = "experiment.txt"
-con_file_pattern = "con(*,*,*).txt"
+con_file_pattern = "con_*.txt"
 
-def normalize_and_plot_specific_files(dir_name, experiment_file, con_file_pattern):
+def normalize_and_plot_specific_files(experiment_file, con_file_pattern):
     plt.figure( figsize=(15, 10), \
                 # facecolor='ivory' \
                )
@@ -32,16 +31,14 @@ def normalize_and_plot_specific_files(dir_name, experiment_file, con_file_patter
         print(f"Error processing experiment file '{experiment_file}': {e}")
     
     # 計算結果のRCを用意するところ
-    os.chdir(dir_name)
     con_files = glob.glob(con_file_pattern) # マッチするパスを全て回収
     valid_con_files = []
     
     for file in con_files:
-        if re.match(r"con\(\d+\.\d+,\d+\.\d+,\d+\.\d+\)\.txt", file):
-            valid_con_files.append(file)
+        valid_con_files.append(file)
     
     if not valid_con_files:
-        print("No valid con(R,r,SIC) files found.")
+        print("No matched files found.")
         return
 
     # ファイル処理部分
@@ -80,9 +77,6 @@ def normalize_and_plot_specific_files(dir_name, experiment_file, con_file_patter
                 fontsize=20 )
     plt.tight_layout()
     plt.savefig('Compare_RC.png')
-
-    os.rename('Compare_RC.png', '../Compare_RC.png')
-    os.chdir('../')
     open_img('Compare_RC.png')
 
 def open_img(image_path):
@@ -93,4 +87,57 @@ def open_img(image_path):
     else:  # Linux
         subprocess.run(["xdg-open", image_path])
 
-normalize_and_plot_specific_files(dir_name, experiment_file, con_file_pattern)
+
+def refine_to_dft(experiment_file, con_file_pattern):
+    try:
+        with open(experiment_file, 'r') as f:
+            exp_line = f.readlines()
+            f.close()
+
+        exp_data = []
+        for i in exp_line:
+            i = i.replace('\n','').split('\t')
+            exp_data.append(i)
+
+        df_exp = pd.DataFrame(exp_data).astype(float).rename(columns={0:'Angle', 1:'Exp'})
+        df_exp['Exp'] = df_exp['Exp'] / df_exp['Exp'].sum()
+
+    except Exception as e:
+        print(f"Error processing experiment file '{experiment_file}': {e}")
+    
+    # 計算結果のRCを用意するところ
+    con_files = glob.glob(con_file_pattern) # マッチするパスを全て回収
+    valid_con_files = []
+    
+    for file in con_files:
+        valid_con_files.append(file)
+    
+    if not valid_con_files:
+        print("No matched files found.")
+        return
+
+    # ファイル処理部分
+    try:
+        for idx, file in enumerate(valid_con_files):
+            with open(file, 'r') as f:
+                calc_line = f.readlines()
+                f.close()
+
+            calc_data = []
+            df = df_exp
+
+            for i in calc_line:
+                i = i.replace('\n','').split()
+                calc_data.append(i)
+
+            name = 'Calc' + str(idx+1)
+            df_calc = pd.DataFrame(calc_data).astype(float).rename(columns={0: 'Angle',1: name})
+            df_calc[name] = df_calc[name] / df_calc[name].sum()
+            df = df.merge(df_calc, how='left', on='Angle')
+            df.to_csv('Data.csv',header=False,index=False)
+
+    except Exception as e:
+        print(f"Error processing file '{file}': {e}")
+        
+normalize_and_plot_specific_files(experiment_file, con_file_pattern)
+refine_to_dft(experiment_file, con_file_pattern)
