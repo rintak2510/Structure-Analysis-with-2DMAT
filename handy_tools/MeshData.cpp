@@ -1,48 +1,56 @@
-from mpi4py import MPI
-import numpy as np
-import os
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
-# MPI初期化
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+// linspace関数は前述のものを使用
 
-# パラメータ空間の各軸
-z1 = np.linspace(3.2, 4.0, 9)
-z2 = np.linspace(3.2, 4.0, 9)
-z3 = np.linspace(3.2, 4.0, 9)
-z4 = np.linspace(3.2, 4.0, 9)
-a1 = np.linspace(0.40, 0.50, 21)
-a2 = np.linspace(1.20, 1.30, 21)
-a3 = np.linspace(0.40, 0.50, 21)
-a4 = np.linspace(1.20, 1.30, 21)
-b1 = np.linspace(1.55, 1.65, 21)
-b2 = np.linspace(0.70, 0.80, 21)
-b3 = np.linspace(0.70, 0.80, 21)
-b4 = np.linspace(1.55, 1.65, 21)
+int main() {
+    std::vector<std::vector<double>> axes = {
+        linspace(-0.3, -0.2, 101),   // a1
+        linspace(13.1, 13.5, 21),    // z1
+        linspace(-0.31, -0.28, 31),  // a0
+        linspace(10.4, 10.8, 9)      // z0
+    };
 
-axes = [z1, z2, z3, z4, a1, a2, a3, a4, b1, b2, b3, b4]
-shape = list(map(len, axes))  # 各軸の長さ
-total_points = np.prod(shape)  # 全体の組み合わせ数
+    std::ofstream fout("MeshData.txt");
+    if (!fout) {
+        std::cerr << "ファイルを開けませんでした。" << std::endl;
+        return 1;
+    }
 
-# インデックスから多次元インデックスに変換
-def unravel_index(idx, shape):
-    indices = []
-    for s in reversed(shape):
-        indices.append(idx % s)
-        idx //= s
-    return list(reversed(indices))
+    std::vector<size_t> indices(axes.size(), 0);
+    int idx = 0;
 
-# 出力ファイル（ランク別）
-output_file = f"MeshData_rank{rank}.txt"
+    while (true) {
+        // パラメータ値を取り出し
+        double a1 = axes[0][indices[0]];
+        double z1 = axes[1][indices[1]];
+        double a0 = axes[2][indices[2]];
+        double z0 = axes[3][indices[3]];
 
-with open(output_file, "w") as f:
-    for flat_idx in range(rank, total_points, size):
-        multi_idx = unravel_index(flat_idx, shape)
-        values = [axes[dim][i] for dim, i in enumerate(multi_idx)]
-        line = f"{flat_idx + 1} " + " ".join(map(str, values)) + "\n"
-        f.write(line)
+        // 制約条件
+        if (z1 > z0) {
+            fout << idx << " "
+                 << std::fixed << std::setprecision(8)
+                 << a1 << " " << -a1 << " "
+                 << z1 << " " << a0 << " " << -a0 << " " << z0 << "\n";
+            ++idx;
+        }
 
-if rank == 0:
-    print(f"[INFO] 出力完了: 各ランク {output_file} に書き出しました（全 {total_points:,} 点）")
+        // インデックスを進める（多軸カウンタ）
+        bool carry = true;
+        for (int d = axes.size() - 1; d >= 0 && carry; --d) {
+            if (++indices[d] >= axes[d].size()) {
+                indices[d] = 0;
+            } else {
+                carry = false;
+            }
+        }
+        if (carry) break;  // 全組み合わせ終了
+    }
 
+    fout.close();
+    std::cout << "MeshData.txt に " << idx << " 行を書き込みました。" << std::endl;
+    return 0;
+}

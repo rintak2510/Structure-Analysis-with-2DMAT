@@ -1,13 +1,18 @@
-import numpy as np
 from itertools import product
+import numpy as np
 
-# 軸ごとに不等間隔に設定も可能
-z1 = np.linspace(3.6, 4.0, 5)
-z2 = np.linspace(3.6, 4.0, 5)
-z3 = np.linspace(3.4, 3.8, 3)
+# パラメータ空間の各軸
+a1_vals = np.linspace(-0.3, -0.2, 101)
+z1_vals = np.linspace(13.1, 13.5, 21)
+a0_vals = np.linspace(-0.31, -0.28, 31)
+z0_vals = np.linspace(10.4, 10.8, 9)
 
-points = list(product(z1, z2, z3))
-
-with open("meshdata.txt", "w") as f:
-    for p in points:
-        f.write(" ".join(map(str, p)) + "\n")
+# 出力ファイルに逐次書き出し
+with open("MeshData.txt", "w") as f:
+    idx = 0
+    for a1, z1, a0, z0 in product(a1_vals, z1_vals, a0_vals, z0_vals):
+        # 制約条件が必要な場合はここに記述（例: z1 > z0）
+        if z1 > z0:
+            line = [a1, -a1, z1, a0, -a0, z0]
+            f.write(f"{idx} " + " ".join(map(str, line)) + "\n")
+            idx += 1
