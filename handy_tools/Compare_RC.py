@@ -19,7 +19,7 @@ def normalize_and_plot_specific_files(experiment_file, con_file_pattern):
         data = np.loadtxt(experiment_file)
         x = data[:, 0]
         y = data[:, 1]
-        y_normalized = y / np.max(y)
+        y_normalized = y / np.sum(y)
         plt.scatter(    x, y_normalized, \
                         label=f"Experiment: {experiment_file}", \
                         edgecolor='Red', \
@@ -47,7 +47,7 @@ def normalize_and_plot_specific_files(experiment_file, con_file_pattern):
             data = np.loadtxt(file)
             x = data[:, 0]
             y = data[:, 1]
-            y_normalized = y / np.max(y)
+            y_normalized = y / np.sum(y)
             plt.plot( \
                     x, y_normalized, \
                     label=f"Con File: {file}" 
@@ -118,13 +118,13 @@ def refine_to_dft(experiment_file, con_file_pattern):
 
     # ファイル処理部分
     try:
+        df = df_exp
         for idx, file in enumerate(valid_con_files):
             with open(file, 'r') as f:
                 calc_line = f.readlines()
                 f.close()
 
             calc_data = []
-            df = df_exp
 
             for i in calc_line:
                 i = i.replace('\n','').split()
@@ -134,7 +134,7 @@ def refine_to_dft(experiment_file, con_file_pattern):
             df_calc = pd.DataFrame(calc_data).astype(float).rename(columns={0: 'Angle',1: name})
             df_calc[name] = df_calc[name] / df_calc[name].sum()
             df = df.merge(df_calc, how='left', on='Angle')
-            df.to_csv('Data.csv',header=False,index=False)
+        df.to_csv('Data.csv',header=False,index=False)
 
     except Exception as e:
         print(f"Error processing file '{file}': {e}")
