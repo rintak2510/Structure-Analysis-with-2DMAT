@@ -18,6 +18,10 @@ import stdutils
 # まずはpandasでテーブルを読み込む
 data_manager = pd.read_csv('data_manager.csv')
 
+# ディレクトリを順次読み込んで、処理を行えるようにする
+tmp = subprocess.check_output('ls -F | grep /', shell=True, text=True)
+dirs = tmp.strip().split('\n')
+
 # 保存先のフォルダを作っておかなければならないため
 for sample in data_manager['sample'].unique():
     os.makedirs(sample, exist_ok=True)
@@ -26,10 +30,6 @@ for sample in data_manager['sample'].unique():
     for child_dir in child_dirs:
         os.makedirs(child_dir,exist_ok=True)
     os.chdir('../')
-
-# ディレクトリを順次読み込んで、処理を行えるようにする
-tmp = subprocess.check_output('ls -F | grep /', shell=True, text=True)
-dirs = tmp.strip().split('\n')
 
 for d in dirs:
     target_file = d + 'result of intensity.txt'
@@ -50,6 +50,6 @@ for d in dirs:
 
     # それ以外の場合は保存の失敗したことを返すようにする。
     else:
-        print('SAVING' + d + 'FAILED!')
+        print('Saving' + d + 'FAILED!')
 
         
