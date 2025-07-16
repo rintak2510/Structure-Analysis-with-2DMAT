@@ -44,12 +44,12 @@ for d in dirs:
         subprocess.run(['cp', target_file, destination])
 
         # 処理が完了したことを示せるように、成功メッセージを返し、保存形式を変更する
-        print('Saving' + d + 'succeeded.')
+        print('Saving ' + d + ' succeeded.')
         new_name = d[:-1] + '.bak'
         os.rename(d, new_name)
 
     # それ以外の場合は保存の失敗したことを返すようにする。
     else:
-        print('Saving' + d + 'FAILED!')
+        print('Saving ' + d + ' FAILED!')
 
         
