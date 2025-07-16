@@ -5,6 +5,7 @@ warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning
 
 filename = sys.argv[1]
 row = 'intensity3'
+diff = -0.1
 
 def open_data(filename, row):
     with open (filename, 'r') as file:
@@ -18,6 +19,7 @@ def open_data(filename, row):
 
     df_data = pd.DataFrame(data_list[1:], columns=data_list[0]).astype(float)
     exp = df_data[['Angle', row]]
+    exp['Angle'] = exp['Angle'] + diff
     exp[row] = exp[row] / exp[row].sum()
     return exp
 
