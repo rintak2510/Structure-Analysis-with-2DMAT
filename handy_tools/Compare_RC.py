@@ -135,7 +135,12 @@ def refine_to_dft(experiment_file, con_file_pattern):
             name = 'Calc' + str(idx+1)
             df_calc = pd.DataFrame(calc_data).astype(float).rename(columns={0: 'Angle',1: name})
             df_calc[name] = df_calc[name] / df_calc[name].sum()
-            df = df.merge(df_calc, how='left', on='Angle')
+
+            df_exp['Angle'] = df_exp['Angle'].round(1)
+            df_calc['Angle'] = df_calc['Angle'].round(1)
+            df = df.merge(df_calc, how='left', on='Angle').fillna(0)
+            r_factor = ((df['Exp'] - df[name]) ** 2).sum() ** 0.5 * 100
+            print(f"R-factor for {name}: {r_factor.round(2)}")
         df.to_csv('Data.csv',header=False,index=False)
 
     except Exception as e:
