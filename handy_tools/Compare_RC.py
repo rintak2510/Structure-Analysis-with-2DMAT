@@ -141,7 +141,7 @@ def refine_to_dft(experiment_file, con_file_pattern):
             df = df.merge(df_calc, how='left', on='Angle').fillna(0)
             r_factor = ((df['Exp'] - df[name]) ** 2).sum() ** 0.5 * 100
             print(f"R-factor for {name}: {r_factor.round(2)}")
-        df.to_csv('Data.csv',header=False,index=False)
+        df.round(5).to_csv('Data.txt',sep='\t',header=False,index=False)
 
     except Exception as e:
         print(f"Error processing file '{file}': {e}")
