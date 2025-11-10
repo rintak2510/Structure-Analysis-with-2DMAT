@@ -73,7 +73,7 @@ def plot_rz_dependency(df: pd.DataFrame,
                 x_ticks = np.linspace(0, len(x_vals)-1, 3)
                 y_ticks = np.linspace(0, len(y_vals)-1, 3)
                 ax.set_xticks(x_ticks)
-                ax.set_xticklabels([f"{v:.3g}" for v in np.quantile(x_vals, [0, 0.5, 1])])
+                ax.set_xticklabels([f"{v:.3g}" for v in np.quantile(x_vals, [0, 0.5, 1])], rotation=0)
                 ax.set_yticks(y_ticks)
                 ax.set_yticklabels([f"{v:.3g}" for v in np.quantile(y_vals, [0, 0.5, 1])])
                 ax.invert_yaxis()
