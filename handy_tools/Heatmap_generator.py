@@ -1,11 +1,12 @@
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 import os
 import subprocess
 import platform
 
-filename = '100.txt'
-savename = ''
+filename = sys.args[1]  # 入力ファイル名
+savename = '' # 保存しないなら空欄のまま
 
 def intensity_data(filename):
     with open(filename, 'r') as f:

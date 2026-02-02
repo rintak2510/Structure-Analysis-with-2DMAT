@@ -4,5 +4,5 @@
 ./bulk.exe
 ./surf.exe
 python3 /Users/rin/Datafiles/2DMAT/2DMAT/script/make_Convolution.py
-read input
-mv convolution.txt ${input}
+
+mv convolution.txt $1

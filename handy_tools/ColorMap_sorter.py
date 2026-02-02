@@ -1,5 +1,7 @@
-input_file = input()   # 読み込み元のファイル名
-output_file = input()  # 書き込み先のファイル名
+import sys
+
+input_file = sys.argv[1]
+output_file = sys.argv[2]
 
 def sort_lines_by_last_value(input_file, output_file):
     # ファイルを読み込み

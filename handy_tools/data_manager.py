@@ -36,7 +36,7 @@ for d in dirs:
     
     if os.path.exists(target_file):
         # 先に保存箇所やショートネームを取得しなくてはならない。
-        information = data_manager.query('timestamp == @d')
+        information = data_manager[data_manager['timestamp'].str.match(d[:-1])]
 
         # 面倒でやらなかったが本来はここでdata_managerのデータ照合に失敗した時のエラーを処理する必要がある
         name, sample, direction = information.iloc[0][1:4]

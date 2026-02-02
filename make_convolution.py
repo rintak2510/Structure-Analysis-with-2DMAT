@@ -17,10 +17,10 @@
 import numpy as np
 
 first_line = 5
-last_line = 67
+last_line = 62
 row_number = 2
 
-omega = 0.4
+omega = 0.35
 def g(x):
     g = (0.939437 / omega) * np.exp(-2.77259 * (x ** 2.0 / omega ** 2.0))
     return g

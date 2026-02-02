@@ -1,30 +1,9 @@
 import pandas as pd
 
-with open('experiment.txt', 'r') as f:
-    exp_lines = f.readlines()
-    f.close()            
-         
-with open('angle_rot/con_-30.txt', 'r') as f:
-     calc_lines = f.readlines()
-     f.close()
+output_file = "rz_dependency.txt"
+param_name = {1: 'r1', 2: 'r2', 3: 'z1', 4: 'z2', 10: "R"} # 辞書型で与える
 
-exp_list = []
-calc_list = []
-
-for i in exp_lines:
-     i = i.replace('\n','').split('\t')
-     exp_list.append(i)
-
-for i in calc_lines:
-     i = i.replace('\n','').split(' ')
-     calc_list.append(i)
-
-df_calc = pd.DataFrame(calc_list,columns=['Angle', 'Calc']).astype(float)
-df_exp = pd.DataFrame(exp_list, columns=['Angle', 'Exp']).astype(float)
-
-data = pd.merge(df_exp, df_calc, on='Angle')
-
-data['Exp'] = data['Exp'] / data['Exp'].sum()
-data['Calc'] = data['Calc'] / data['Calc'].sum()
-
-out = data.to_csv('defined.txt',header=False, index=False)
+df_res = pd.read_csv("ColorMap.txt", sep="\s+", header=None)
+df_params= pd.read_csv("ParamsList.txt", sep="\s+", header=None).drop(0,axis=1)
+df_out = df_params.join(df_res.iloc[:, -1]).rename(columns=param_name)
+df_out.to_csv(output_file, sep="\t", index=False)
