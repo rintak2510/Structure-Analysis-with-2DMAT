@@ -1,9 +1,14 @@
+# ファイル名指定性にした改良版
 import NumPy as np
+import sys
+
+input_file = sys.argv[1]
+output_file = sys.argv[2]
 
 fxlist = []
 combined = []
 
-files_input = open("ColorMap.txt","r")
+files_input = open(input_file,"r")
 lines = files_input.readlines()
 
 for line in lines:
@@ -15,7 +20,7 @@ for line in lines:
 
 combined.sort(key=operator.itemgetter(-1),reverse=True)
 
-output = open("sorted_ColorMap.txt","w+")
+output = open(output_file,"w+")
 for nums in combined:
     output.writelines(nums)
 output.close
